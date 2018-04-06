@@ -588,17 +588,24 @@ function closeAllPositions() {
 		get('/positions', 2)
 			.then(r => {
 				let temp = r.body.positions;
-				if (temp.length === 0)(res('There is no position to close'));
-				for (let i = 0; i < temp.length; i++) {
-					tickets.push({
-						'dealId': temp[i].position.dealId, // to be tested
-						'direction': temp[i].position.direction === 'BUY' ? 'SELL' : 'BUY', // invert to opposite side
-						// 'epic' : temp[i].market.epic,
-						// 'expiry': temp[i].market.expiry,
-						'orderType': 'MARKET',
-						'size': temp[i].position.size
-					});
+				// Catch occasional no response from IG
+				if ( typeof temp !== 'undefined' && temp ) {
+				  if (temp.length === 0)(res('There is no position to close'));
+					for (let i = 0; i < temp.length; i++) {
+						tickets.push({
+							'dealId': temp[i].position.dealId, // to be tested
+							'direction': temp[i].position.direction === 'BUY' ? 'SELL' : 'BUY', // invert to opposite side
+							// 'epic' : temp[i].market.epic,
+							// 'expiry': temp[i].market.expiry,
+							'orderType': 'MARKET',
+							'size': temp[i].position.size
+						});
+					}
+				} else {
+					res('IG response is undefined');
 				}
+
+				
 
 				function _close(index) {
 					if (tickets[index]) {
